@@ -126,5 +126,5 @@ def main(jsonfile):
             pass
 
 if __name__ == "__main__":
-    jsonfile = r'/home/wangxinhua/level1/Level1rev08New/json.txt'
+    jsonfile = r'/home/wangxinhua/level1/Level1/Level1rev08New/json.txt'
     main(jsonfile)
