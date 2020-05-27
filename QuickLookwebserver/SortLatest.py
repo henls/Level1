@@ -32,7 +32,7 @@ def three2one(src):
         except Exception as e:
             pass
 if __name__ == '__main__':
-    jsonfile = open(r'/home/wangxinhua/level1/Level1rev08New/json.txt','r')
+    jsonfile = open(r'/home/wangxinhua/level1/Level1/Level1rev08New/json.txt','r')
     jsons = json.load(jsonfile)
     jsonfile.close()
     src = jsons['LatestFitsR0']

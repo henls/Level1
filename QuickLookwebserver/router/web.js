@@ -24,7 +24,7 @@ dateYear=dateNow.split('-')[0]
 //server=express();
 Router.get('/LatestNvstImage',function (req,res,next) {
     let filenames = []
-    jsons = fs.readFileSync('/home/wangxinhua/level1/Level1rev08New/json.txt').toString()
+    jsons = fs.readFileSync('/home/wangxinhua/level1/Level1/Level1rev08New/json.txt').toString()
     
     latestpath = JSON.parse(jsons)['LatestFitsR0']
     //const files  = fs.readdirSync(latestpath)

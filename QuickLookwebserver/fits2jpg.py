@@ -48,9 +48,9 @@ def fits2jpg(src,dst):
             pass
     
 if __name__ == "__main__":
-    jsons = r'/home/wangxinhua/level1/Level1rev08New/json.txt'
+    jsons = r'/home/wangxinhua/level1/Level1/Level1rev08New/json.txt'
     f = open(jsons,'r')
     src = json.load(f)["LatestFitsR0"]
     f.close()
-    dst = r'/home/wangxinhua/QuickLookwebserver/www/LatestNvstImage'
+    dst = r'/home/wangxinhua/level1/Level1/QuickLookwebserver/www/LatestNvstImage'
     fits2jpg(src,dst)
