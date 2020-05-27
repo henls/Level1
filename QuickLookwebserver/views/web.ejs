@@ -1,0 +1,77 @@
+<title>Latest NVST Image</title>
+<div align='center' style="font-size:35px">NVST Quick Look (HA)</div>
+<link rel='Shortcut Icon' href='/bitbug_favicon.ico' type="image/x-icon" />
+<body>
+<div id="sdo-newest" align="center" style="font-size:24px" > </div> 
+<script>
+    var myVar = setInterval(function(){ myTimer() }, 1000);
+     
+    
+    Date.prototype.format = function(fmt) { 
+         var o = { 
+            "M+" : this.getMonth()+1,                 //月份 
+            "d+" : this.getDate(),                    //日 
+            "h+" : this.getHours(),                   //小时 
+            "m+" : this.getMinutes(),                 //分 
+            "s+" : this.getSeconds(),                 //秒 
+            "q+" : Math.floor((this.getMonth()+3)/3), //季度 
+            "S"  : this.getMilliseconds()             //毫秒 
+        }; 
+        if(/(y+)/.test(fmt)) {
+                fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+        }
+         for(var k in o) {
+            if(new RegExp("("+ k +")").test(fmt)){
+                 fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+             }
+         }
+        return fmt; 
+    }
+    
+    function myTimer() {
+        var d = new Date().format("yyyy-MM-dd hh:mm:ss");
+        document.getElementById("sdo-newest").innerHTML = d;
+    }
+    </script>
+<table border="1" align="center" style="border-right-style:none;border-left-style:none;border-top-style:none;border-bottom-style:none">
+<tr>
+    <th><%= data.RB %> Latest Image(R0:<%= data.RR0 %>&nbsp;&nbsp;&nbsp;m)<br /> <div id='RT' > </div></th>
+    <th style="border-right-style:none;border-left-style:none;border-top-style:none;border-bottom-style:none"></th>
+    <th><%= data.RLB %> Last Image(R0:<%= data.RLR0 %>&nbsp;&nbsp;&nbsp;m)<br /> <div id='RTT' > </div></th>
+</tr>
+<tr>
+<td align="center"> 
+    <img alt="No latest observation images" src="R.jpg" height="500" width="502" scrolling='no' /> 
+</td>
+<td style="border-right-style:none;border-left-style:none;border-top-style:none;border-bottom-style:none" ><img alt='Arrow Image' src='sorrow.jpg' heigh = '500' width='50'/></td>
+<td align='center'>
+    <img alt="No last  observation images" src="RL.jpg" height="500" width="502" scrolling='no' />
+</td>
+</tr>
+<script>
+function myrefresh(){
+        window.location.reload(true);
+}
+setTimeout('myrefresh()',60000);
+</script>
+</table>
+<script>
+    function str2time(){
+        var RT = '<%= data.RT %>'
+        var RTT = '<%= data.RTT %>'
+	if (RT==''){
+        //RT = 'UTC '+RT;
+        //RTT = 'UTC '+RRT;
+		document.getElementById("RT").innerHTML = 'UTC';
+		document.getElementById("RTT").innerHTML = 'UTC';	
+	}else{
+        RT = 'UTC '+String(parseInt(RT.slice(0,2)))+':'+RT.slice(2,4)+':'+RT.slice(4,6);
+        RTT = 'UTC '+String(parseInt(RTT.slice(0,2)))+':'+RTT.slice(2,4)+':'+RTT.slice(4,6);
+        //console.log(RT)
+		document.getElementById("RT").innerHTML = RT;
+		document.getElementById("RTT").innerHTML = RTT;
+    }
+	}
+    str2time();
+</script>
+</body>

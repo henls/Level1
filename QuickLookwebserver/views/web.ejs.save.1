@@ -1,0 +1,240 @@
+<title>FSO气象实时数据</title>
+<link rel='Shortcut Icon' href='/bitbug_favicon.ico' type="image/x-icon" />
+<style>
+.box {
+
+    display: flex;
+
+    flex-wrap:wrap;
+
+    justify-content: center;
+
+    
+
+}
+
+.div-inline{
+
+display:inline;
+
+}
+
+.item {
+
+    width: 20.01%;
+
+    height: 50px;
+
+    margin-bottom: 10px;
+
+}
+
+.placeholder{
+
+    width: 5%;
+
+    heigth: 0px;
+
+}
+
+.red{
+
+    color:#ff0000;
+
+}
+
+.black{
+
+    color:#000;
+
+}
+table {
+    line-height: 2em;
+    font-family: Arial;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #eec4c4 #eec4c4 #fff #fff;
+    text-shadow: 0 1px 0 #FFF;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #ffe9e9;
+}
+th {
+    color: #a03f3f;
+    font-weight: normal;
+    text-align: left;
+}
+td {
+    color: #c48080;
+    font-size: 0.8em;
+}
+th,td {
+    padding: 0 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #fff #fff #eec4c4 #eec4c4;
+}
+</style>
+<body>
+    
+    <!-- 测试阶段-->
+    <!-- 带=的不会解析HTML标签，
+        带-的会解析HTML标签
+        判断语句注意：1.不能加=号 2.闭合{}-->
+    <!-- <%= title %>-->
+    <div align='center' style="font-size:35px">抚仙湖观测站FSO气象实时数据</div>
+    <!--＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊ -->
+    <hr>
+    <!--<%- head %>-->
+    <div style="font-size: 30px">气象数据</div>
+    <hr>
+    
+    <div align='center'><b id='time'></b></div><br>
+    <div align='center'><b>本次数据时间：<%= data.yearNow %>   <%= data.monthNow %></b></div>
+    <script>
+        document.getElementById('time').innerHTML='当前时间：'+Date();
+    </script>
+    <br><br>
+    <style type="text/css">
+    a:link,a:visited{font-size:40px}
+    
+    </style>
+    
+    
+    <div class='box'>
+    <div class='item'><a id='temp' href="temp.html">温度:<%= data.tem %>℃</a></div>
+
+    <!-- 温度：<%= data.tem %> -->
+    <div class='item'><a id='dew' href="dew.html">露点:<%= data.dew %>℃</a></div>
+
+    <div class='item'><a href="press.html">气压:<%= data.press %>hPa</a></div>
+
+    <div class='item'><a id="humm" href="hum.html">相对湿度:<%= data.hum %>%</a></div>
+
+    <br><br><br><br><br>
+    
+
+    <div class='item'><a id='dir' href="dir_wind.html">风向:<%= data.dir_wind %> °</a></div>
+
+    <div class='item'><a href="speed.html">风速:<%= data.speed %>m/s</a></div>
+
+    <div class='item'><a href="rain.html">雨量:<%= data.rain %>mm/min</a></div>
+
+    <div class='item'><a href="rad.html">辐射强度:<%= data.rad %>W/m^2</a></div>
+    </div>
+    
+    <!--<a href="dew.html">露点:<%= data.dew %>℃</a>-->
+    <br>
+    <div >注：风向是从北算起顺时针方向的角度</div>
+    <!-- 湿度：<%= data.hum %>
+    气压：<%= data.press %>
+    风速：<%= data.spreed %>
+</div>    风向：<%= data.dir_wind %>
+    露点：<%= data.dew %> -->
+    <hr>
+    <div style="font-size: 30px;position:relative;border:1px;text-align:center;" >当前天区图像</p></div>
+
+    <img id="myimage"   src="heaven.jpg" onclick='changeImage()' alt='image' width="800" height="600" >
+    <table>
+    <tr><td>LATEST X-RAY EVENT(1-8Å)</td></tr>
+        <tr><td>Current</td></tr>
+        <tr><td width='180'><%= data.current%> UTC</td></tr>
+        <tr><td><%= data.current_class%></td></tr>
+        <tr><td>Ratio:<%= data.ratio%></td></tr>
+        <tr><td>Beginning</td></tr>
+        <tr><td width='180'><%= data.begin%> UTC</td></tr>
+        <tr><td><%= data.begin_class%></td></tr>
+        <tr><td>Maximum</td></tr>
+        <tr><td width='180'><%= data.max%> UTC</td></tr>
+        <tr><td><%= data.max_class%></td></tr>
+        <tr><td width='210'>Integrated flux:<%= data.xrlong%> J/m^2</td></tr>
+        <tr><td>End</td></tr>
+        <tr><td width='180'><%= data.end%> UTC</td></tr>
+        <tr><td><%= data.end_class%></td></tr>
+
+    <!--<tr>
+        <td>first</td>
+        <td>-</td>
+        <td>third</td>
+        <td>fourth</td>
+    </tr>
+    <tr>
+        <td>Row</td>
+        <td>Row</td>
+        <td>Row</td>
+        <td>Row</td>
+    </tr>-->
+    </table>
+    </div>
+    </div>
+    <script>
+    function changeImage()
+    {
+    	element=document.getElementById('myimage')
+    	if (element.src.match("heaven.jpg"))
+    	{
+    		element.src="heaven.jpg";
+    	}
+    	else
+    	{
+    		element.src="heaven.jpg";
+    	}
+    }
+    //function changtem(){
+      //  document.getElementById('tem').src='/home/pi/Desktop/temperature.jpg';
+    //}
+    function myrefresh(){
+    window.location.reload();
+    }
+    setTimeout('myrefresh()',10000); //指定10秒刷新一次
+    function changecolor(){
+       if(parseInt('<%= data.hum %>')>84){
+       document.getElementById('humm').className='red';
+       }else if(parseInt('<%= data.tem%>')<=parseInt('<%= data.dew%>')){
+       document.getElementById('temp').className='red';
+       document.getElementById('dew').className='red';
+}
+       
+    }
+    changecolor()
+    function wind_dir(){
+    var mathvalue = parseInt('<%= data.dir_wind%>')
+    var value=Math.floor(parseInt('<%= data.dir_wind%>')/90);
+    var angle=parseInt('<%= data.dir_wind%>')%90;
+    if (parseInt('<%= data.dir_wind%>')==0){
+        document.getElementById('dir').innerHTML = '正北'+'('+mathvalue.toString()+'°'+')';
+}else if(parseInt('<%= data.dir_wind%>'==90)){
+        document.getElementById('dir').innerHTML = '正东'+'('+mathvalue.toString()+'°'+')';
+}else if(parseInt('<%= data.dir_wind%>'==180)){
+        document.getElementById('dir').innerHTML = '正南'+'('+mathvalue.toString()+'°',')';
+}else if(parseInt('<%= data.dir_wind%>'==270)){
+        document.getElementById('dir').innerHTML = '正西'+'('+mathvalue.toString()+'°'+')';
+}else{
+    switch(value){
+    case 0:document.getElementById('dir').innerHTML = '北偏东:'+angle.toString()+'°'+'('+parseInt('<%= data.dir_wind%>').toString()+'°'+')';break;
+    case 1:document.getElementById('dir').innerHTML = '东偏南:'+angle.toString()+'°'+'('+paserInt('<%= data.dir_wind%>').toString()+'°'+')';break;
+    case 2:document.getElementById('dir').innerHTML = '南偏西:'+angle.toString()+'°'+'('+parseInt('<%= data.dir_wind%>').toString()+'°'+')';break;
+    case 3:document.getElementById('dir').innerHTML = '西偏北:'+angle.toString()+'°'+'('+parseInt('<%= data.dir_wind%>').toString()+'°'+')';break;
+}
+}
+}
+    wind_dir()
+    </script>
+    <script>
+    /*<hr>
+    <%- head %>
+    <hr>
+    <a href="temp.html">温度</a>：<%= data.tem %>
+    <!-- 温度：<%= data.tem %> -->
+    <a href="hum.html">湿度</a>：<%= data.hum %>
+    <a href="press.html">气压</a>：<%= data.press %>
+    <a href="speed.html">风速</a>：<%= data.spreed %>
+    <a href="dir_wind.html">风向</a>：<%= data.dir_wind %>
+    <a href="dew.html">露点</a>：<%= data.dew %> 
+    <!-- 湿度：<%= data.hum %>
+    气压：<%= data.press %>
+    风速：<%= data.spreed %>
+    风向：<%= data.dir_wind %>
+    露点：<%= data.dew %> -->*/
+</script>
+</body>
