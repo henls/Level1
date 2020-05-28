@@ -41,11 +41,11 @@
 </tr>
 <tr>
 <td align="center"> 
-    <img alt="No latest observation images" src="R.jpg" height="795" width="800" scrolling='no' /> 
+    <img alt="No latest observation images" id='latestimg'  src="R.jpg" height="795" width="800" scrolling='no' /> 
 </td>
 <td style="border-right-style:none;border-left-style:none;border-top-style:none;border-bottom-style:none" ><img alt='Arrow Image' src='sorrow.jpg' heigh = '500' width='50'/></td>
 <td align='center'>
-    <img alt="No last  observation images" src="RL.jpg" height="795" width="800" scrolling='no' />
+    <img alt="No last  observation images" id='lastimg' src="RL.jpg" height="795" width="800" scrolling='no' />
 </td>
 </tr>
 <script>
@@ -63,7 +63,9 @@ setTimeout('myrefresh()',60000);
         //RT = 'UTC '+RT;
         //RTT = 'UTC '+RRT;
 		document.getElementById("RT").innerHTML = 'UTC';
-		document.getElementById("RTT").innerHTML = 'UTC';	
+		document.getElementById("RTT").innerHTML = 'UTC';
+        document.getElementById('latestimg').src = 'nvst.png';
+        document.getElementById('lastimg').src = 'fxh.png';
 	}else{
         RT = 'UTC '+String(parseInt(RT.slice(0,2)))+':'+RT.slice(2,4)+':'+RT.slice(4,6);
         RTT = 'UTC '+String(parseInt(RTT.slice(0,2)))+':'+RTT.slice(2,4)+':'+RTT.slice(4,6);
