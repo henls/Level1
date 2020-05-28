@@ -88,6 +88,31 @@ class myProcessing(object):
                 pass
 
 
+def KeepNewestFlat(flatpath):
+    flatpath = flatpath
+    flats = os.listdir(flatpath)
+    archive = {}
+    bandoff = set([i[14:18] for i in flats])
+    for i in flats:
+        l = []
+        for j in bandoff:
+            if j in i:
+                try:
+                    List = archive[j]
+                    List.append(i)
+                    archive.update({j:List})
+                except Exception as e:
+                    archive.update({j:[i]})
+    a = archive.copy()
+    for i in bandoff:
+        historyflat = archive[i]
+        IntHistoryFlat = [int(i[:8]) for i in historyflat]
+        newest = historyflat[IntHistoryFlat.index(max(IntHistoryFlat))]
+        archive[i].remove(newest)
+        for j in archive[i]:
+            os.remove(os.path.join(flatpath,j))
+
+
 def LtstDtlFts(filepath,r0,fitsname):
     #print(1)
     f = open(filepath,'a')
@@ -103,6 +128,8 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
     DirFlat = DirFlat
     DirDark = DirDark
     DeviceNumber = DeviceNumber
+    print(DirFlat)
+    print(DirDark)
     #print(DeviceNumber)
     #print(DirFits)
     #print(DirFlat)
@@ -299,6 +326,7 @@ def initial(jsonfile):
             break
         except Exception as e:
             pass
+#添加flat的归档管理功能，保证只保留某波段最新的flat
     try:
         DirDarknew = jsinf['AveDark']
         DirFlatnew = jsinf['AveFlat']
@@ -309,6 +337,7 @@ def initial(jsonfile):
         NewFilenew  = []
     while 1:
         try:#判断程序所需文件是否完整且正确
+            KeepNewestFlat(jsinf['ArchiveFlat'][0])
             logs = open(os.path.join(log_dir,today_time+'.log'),'r')
             jsinf = json.load(logs)
             logs.close()
@@ -321,20 +350,19 @@ def initial(jsonfile):
                 DirDark = jsinf['ArchiveDark'][0]
                 AllDark = os.listdir(DirDark)
                 #print(AllDark)
-                DirDark = [os.path.join(DirDark,AllDark[-1])]
+                DirDark = [os.path.join(DirDark,AllDark[0])]
                 #print(DirDark)
                 AllFlat = os.listdir(DirFlat)
                 archflat = []
                 for i in AllFlat:
-                    if len(i)<12:
-                        archflat.append(os.path.join(DirFlat,i))
+                    archflat.append(os.path.join(DirFlat,i))
                 DirFlat = archflat
             elif 'AveDark' not in jsinf.keys() and sum(size_newfile)>10:
                 #NewFile = jsinf['NewFile']#"/home/wangxinhua/Desktop/NewFile/20200518Disk_Center365874B363.log"
                 DirDark = jsinf['ArchiveDark'][0]
                 DirFlat = jsinf['AveFlat']
                 AllDark = os.listdir(DirDark)
-                DirDark = [os.path.join(DirDark,AllDark[-1])]
+                DirDark = [os.path.join(DirDark,AllDark[0])]
             elif sum(size_newfile)>10 and 'AveFlat' not in jsinf.keys():
                 #NewFile = jsinf['NewFile']#"/home/wangxinhua/Desktop/NewFile/20200518Disk_Center365874B363.log"
                 DirDark = jsinf['AveDark']
@@ -342,8 +370,7 @@ def initial(jsonfile):
                 AllFlat = os.listdir(DirFlat)
                 archflat = []
                 for i in AllFlat:
-                    if len(i)<12:
-                        archflat.append(os.path.join(DirFlat,i))
+                    archflat.append(os.path.join(DirFlat,i))
                 DirFlat = archflat
             else:
                 DirDark = jsinf['AveDark']

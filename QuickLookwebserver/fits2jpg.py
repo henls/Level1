@@ -27,25 +27,28 @@ def fits2jpg(src,dst):
     '''
     while 1:
         time.sleep(2)
-        latx = os.listdir(src)
+        latx = os.path.join(src,'latest.log')
+        pre = ''
         try:
-            for i in latx:
-                f = open(os.path.join(src,i))
-                detail = f.readlines()
-                latest = detail[0].split('\t')[0]
+            f = open(latx,'r')
+            detail = f.readlines()
+            if detail != pre:
+                pre = detail
+                latest = detail[-1].split('\t')[0]
                 #last = detail[-2].split('\t')[0]
-                save = os.path.join(dst,i[0]+'L.jpg')
+                save = os.path.join(dst,'R.jpg')
                 #save1 = os.path.join(dst,i[0]+'.jpg')
                 data = fits.open(latest)[0].data
                 #plt.imsave(save,data,cmap='gray')
                 filters(save,data)
-                last = detail[1].split('\t')[0]
-                save1 = os.path.join(dst,i[0]+'.jpg')
+                last = detail[-2].split('\t')[0]
+                save1 = os.path.join(dst,'RL.jpg')
                 data1 = fits.open(last)[0].data
                 #plt.imsave(save1,data1,cmap='gray')
                 filters(save1,data1)
+                
         except Exception as e:
-            pass
+            print(e)
     
 if __name__ == "__main__":
     jsons = r'/home/wangxinhua/level1/Level1/Level1rev08New/json.txt'

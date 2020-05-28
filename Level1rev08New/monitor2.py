@@ -113,6 +113,7 @@ def main(jsonfile):
                 ActiveReg = i.split('/')[-3]
                 StartPoint = i.split('/')[-2]
                 band = i.split('/')[-1]
+                #print(os.path.join(Dir_NewFile,Now_time+ActiveReg+StartPoint+band+'.log'))
                 if os.path.exists(os.path.join(Dir_NewFile,Now_time+ActiveReg+StartPoint+band+'.log')) == False:
                     #thread = myThread(log_dir,i,os.path.join(Dir_NewFile,Now_time+ActiveReg+StartPoint+band+'.log'))
                     #thread.start()
