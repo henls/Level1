@@ -38,17 +38,17 @@ class myThread(threading.Thread):
         count = 0
         while 1:
             try:
-                print(self.DirLog)
+                #print(self.DirLog)
                 newfile = open(self.DirLog,'r')
                 new = newfile.readlines()
                 newfile.close()
                 while len(new) != count+1:
                     count += 1
                     DirFits = new[count].replace('\n','')
-                    print(DirFits)
-                    print(self.DirFlat)
-                    print(self.DirDark)
-                    print(self.DirLog)
+                    #print(DirFits)
+                    #print(self.DirFlat)
+                    #print(self.DirDark)
+                    #print(self.DirLog)
                     Align(DirFits,self.DirFlat,self.DirDark)
             except Exception as e:
                 pass
@@ -82,8 +82,9 @@ class myProcessing(object):
                 while len(new) > count+1:
                     #print(45)
                     DirFits = new[count].replace('\n','')
-                    count += 1
+                    #count += 1
                     Align(DirFits,self.DirFlat,self.DirDark,DeviceNumber)
+                    count += 1
             except Exception as e:
                 pass
 
@@ -118,7 +119,7 @@ def LtstDtlFts(filepath,r0,fitsname):
     f = open(filepath,'a')
     f.write(fitsname+'\t'+str(r0)+'\n')
     f.close()
-    print(fitsname+'\t'+r0+'\n')
+    #print(fitsname+'\t'+r0+'\n')
 
 #@profile
 def Align(DirFits,DirFlat,DirDark,DeviceNumber):
@@ -128,10 +129,10 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
     DirFlat = DirFlat
     DirDark = DirDark
     DeviceNumber = DeviceNumber
-    print(DirFlat)
-    print(DirDark)
+    #print(DirFlat)
+    #print(DirDark)
     #print(DeviceNumber)
-    #print(DirFits)
+    print(DirFits)
     #print(DirFlat)
     #print(DirDark)
     #print(DeviceNumber)
@@ -144,127 +145,134 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
     data_path_fits = os.listdir(DirFits)
     Year = datetime.datetime.now().strftime('%Y')
     aligned_path = os.path.join(DirFits[DirFits.index(Year):-7],DirFits[-6:]+'.fits')#2020/20200215/...
-    Filter = data_path_fits.copy()
-    for i in data_path_fits:
-        if os.path.getsize(os.path.join(DirFits,i)) != 2111040:
-            Filter.remove(i)
-    numb = len(Filter)
-    #print('Align')
-    #numb = len(data_path_fits)
-    #在cubedata函数补上预处理过程,添加完毕
-    #print(DirFits)
-    #print(numb)
-    #datas,numb = xyy.cubedata(DirFlat,DirDark,DirFits, data_path_fits,rcxsize,rcysize)
-    #cubedata = cp.array(datas,dtype='<f4')
-    #datas = 0#释放内存
-    #cp.cuda.Device(np.random.randint(0,4)).use()
-    cubedata = cp.array(xyy.cubedata(DirFlat,DirDark,DirFits, Filter,rcxsize,rcysize),dtype='<f4')#将文件夹所有fits转成三维数组
-    #if numb > 1:
-    try:
-        start = time.time()
-        ini = cubedata[0,:,:]
-        initmp = ini[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
-        if sobel == 1:
-            initmp = filters.sobel(filters.gaussian(initmp,5.0))
-        #开始对齐
-        t = 1
-        head=fits.getheader(os.path.join(DirFits,Filter[0]))
-        for j in range(1,numb):#从第二个开始处理并与第一张图对齐
-            data = cubedata[j,:,:]
-            datatmp = data[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
-            if sobel == 1:
-                datatmp = filters.sobel(filters.gaussian(datatmp,5.0))
-            cc,corr = xyy.corrmaxloc_gpu(initmp,datatmp)
-            tmp = xyy.imgshift_gpu(data,[-cc[0],-cc[1]])#对齐后的图
-            if only_align_no_luckyimage == 1:
-                #不选帧，直接叠加
-                print('不选帧对齐模式')
-                ini += tmp
-                t += 1
-            else:
-                #开始对位移后的图选帧
-                cubedata[j,:,:] = tmp[0:rcxsize,0:rcysize]
-        if only_align_no_luckyimage == 1:
-            averg = ini/t
-        else:
-            cubepf=cubedata[:,pfstart[0]:pfstart[0]+pfsize[0],pfstart[1]:pfstart[1]+pfsize[1]]
-            cubemean=cp.mean(cubepf, axis=0)
-            psdcube = cp.empty([numb,pfsize[0],pfsize[1]], dtype=cp.float32) 
-            for nn in range(numb):
-                tmp=cubepf[nn,:,:].copy()
-                meantmp=cp.mean(tmp)
-                tmp=(tmp-meantmp)*win+meantmp
-                psd=cp.abs(cp.fft.fftshift(cp.fft.fft2(tmp)))**2
-                psd=(psd/psd[pfsize[0]//2,pfsize[1]//2]).astype(cp.float32)
-                psdcube[nn,:,:]=psd   
-            psdmean=cp.mean(psdcube, axis=0)
-            psdcube=psdcube/psdmean
-            [Y,X]=cp.meshgrid(cp.arange(pfsize[1]),cp.arange(pfsize[0])) 
-            dist=((X-pfsize[0]//2)**2.0+(Y-pfsize[1]//2)**2.0)**0.5
-            ring=cp.where((dist>=infrq)&(dist<=otfrq), 1.0, 0.0).astype(cp.float32)
-            psdcube=psdcube*ring
-            ringcube=cp.mean(cp.mean(psdcube, axis=1),axis=1)
-            index0=cp.argsort(ringcube)[::-1]#排序
-            cubesort0=cubedata.copy()[index0][0:int(fsp*numb),:,:]#取排序前*的帧，再次相关对齐，叠加
-            ini=cp.mean(cubesort0, axis=0).astype(cp.float32)
-            initmp=ini[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
-            if sobel==1:
-                initmp=filters.sobel(filters.gaussian(cp.asnumpy(initmp),5.0))
-            for nn in range(cubesort0.shape[0]):
-                data=cubesort0[nn,:,:].copy()
-                datatmp=data[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
-                if sobel==1:
-                    datatmp=filters.sobel(filters.gaussian(cp.asnumpy(datatmp),5.0))
-                cc,corr=xyy.corrmaxloc_gpu(initmp, datatmp)
-                tmp=xyy.imgshift_gpu(data,[-cc[0],-cc[1]])#相关对齐
-                cubesort0[nn,:,:]=tmp
-            averg=cp.mean(cubesort0, axis=0).astype(cp.float32)#叠加
-            if postprocess_flag == 1:
-                print('开始退卷积')
-                cubesr=cubedata[:,srstx:srstx+srxsize,srsty:srsty+srysize]
-                try:
-                    r0,index=xyy.cubesrdevr0_gpu(cubesr,srsize,winsr,sitfdata,diameter,diaratio,maxfre,0.00,0.06,start_r0,step_r0)
-                except Exception as e:
-                    sys.exit()
-                sitf=xyy.GetSitf_gpu(sitfdata,maxfre,rcxsize,index)#读取理论点扩散函数
-                img=xyy.ImgPSDdeconv_gpu(averg,sitf)
-                head['CODE2'] = r0#r0写到fits头文件中
-                result=xyy.ImgFilted_gpu(img,gussf)
-                result=result/np.median(cp.asnumpy(result))*np.median(cp.asnumpy(averg))
-                try:#redrive:/*
-                    SaveFits = redrive+os.path.splitdrive(aligned_path[0:-11])[1]
-                    #print(aligned_path)
-                    #print(SaveFits)
-                    xyy.mkdir(SaveFits)
-                    SaveFitsName = os.path.join(SaveFits,aligned_path[-11:])
-                except Exception as e:
-                    #print(e)
-                    pass
-                xyy.writefits(SaveFitsName,cp.asnumpy(result).astype(np.float32),head)
-            else:
-                try:
-                    SaveFits = redrive+os.path.splitdrive(aligned_path[0:-11])[1]
-                    xyy.mkdir(SaveFits)
-                    SaveFitsName = os.path.join(SaveFits,aligned_path[-11:])
-                except Exception as e:
-                    #print(e)
-                    pass
-                result = averg
-                xyy.writefits(SaveFitsName,cp.asnumpy(result).astype(np.float32),head)
-        #print(SaveFitsName)
-        print('elapse:'+str(time.time()-start)+'s')
-        print('计算完毕，等待下一组数据')
+    #增加处理过的文件不再处理的判断
+    SaveFits = redrive+os.path.splitdrive(aligned_path[0:-11])[1]
+    xyy.mkdir(SaveFits)
+    SaveFitsName = os.path.join(SaveFits,aligned_path[-11:])
+    if os.path.exists(SaveFitsName) == 0:
+        Filter = data_path_fits.copy()
+        for i in data_path_fits:
+            if os.path.getsize(os.path.join(DirFits,i)) != 2111040:
+                Filter.remove(i)
+        numb = len(Filter)
+        #print('Align')
+        #numb = len(data_path_fits)
+        #在cubedata函数补上预处理过程,添加完毕
+        #print(DirFits)
+        #print(numb)
+        #datas,numb = xyy.cubedata(DirFlat,DirDark,DirFits, data_path_fits,rcxsize,rcysize)
+        #cubedata = cp.array(datas,dtype='<f4')
+        #datas = 0#释放内存
+        #cp.cuda.Device(np.random.randint(0,4)).use()
+        cubedata = cp.array(xyy.cubedata(DirFlat,DirDark,DirFits, Filter,rcxsize,rcysize),dtype='<f4')#将文件夹所有fits转成三维数组
+        #if numb > 1:
         try:
-            os.mkdir(LatestFitsR0)
+            start = time.time()
+            ini = cubedata[0,:,:]
+            initmp = ini[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
+            if sobel == 1:
+                initmp = filters.sobel(filters.gaussian(initmp,5.0))
+            #开始对齐
+            t = 1
+            head=fits.getheader(os.path.join(DirFits,Filter[0]))
+            for j in range(1,numb):#从第二个开始处理并与第一张图对齐
+                data = cubedata[j,:,:]
+                datatmp = data[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
+                if sobel == 1:
+                    datatmp = filters.sobel(filters.gaussian(datatmp,5.0))
+                cc,corr = xyy.corrmaxloc_gpu(initmp,datatmp)
+                tmp = xyy.imgshift_gpu(data,[-cc[0],-cc[1]])#对齐后的图
+                if only_align_no_luckyimage == 1:
+                    #不选帧，直接叠加
+                    print('不选帧对齐模式')
+                    ini += tmp
+                    t += 1
+                else:
+                    #开始对位移后的图选帧
+                    cubedata[j,:,:] = tmp[0:rcxsize,0:rcysize]
+            if only_align_no_luckyimage == 1:
+                averg = ini/t
+            else:
+                cubepf=cubedata[:,pfstart[0]:pfstart[0]+pfsize[0],pfstart[1]:pfstart[1]+pfsize[1]]
+                cubemean=cp.mean(cubepf, axis=0)
+                psdcube = cp.empty([numb,pfsize[0],pfsize[1]], dtype=cp.float32) 
+                for nn in range(numb):
+                    tmp=cubepf[nn,:,:].copy()
+                    meantmp=cp.mean(tmp)
+                    tmp=(tmp-meantmp)*win+meantmp
+                    psd=cp.abs(cp.fft.fftshift(cp.fft.fft2(tmp)))**2
+                    psd=(psd/psd[pfsize[0]//2,pfsize[1]//2]).astype(cp.float32)
+                    psdcube[nn,:,:]=psd   
+                psdmean=cp.mean(psdcube, axis=0)
+                psdcube=psdcube/psdmean
+                [Y,X]=cp.meshgrid(cp.arange(pfsize[1]),cp.arange(pfsize[0])) 
+                dist=((X-pfsize[0]//2)**2.0+(Y-pfsize[1]//2)**2.0)**0.5
+                ring=cp.where((dist>=infrq)&(dist<=otfrq), 1.0, 0.0).astype(cp.float32)
+                psdcube=psdcube*ring
+                ringcube=cp.mean(cp.mean(psdcube, axis=1),axis=1)
+                index0=cp.argsort(ringcube)[::-1]#排序
+                cubesort0=cubedata.copy()[index0][0:int(fsp*numb),:,:]#取排序前*的帧，再次相关对齐，叠加
+                ini=cp.mean(cubesort0, axis=0).astype(cp.float32)
+                initmp=ini[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
+                if sobel==1:
+                    initmp=filters.sobel(filters.gaussian(cp.asnumpy(initmp),5.0))
+                for nn in range(cubesort0.shape[0]):
+                    data=cubesort0[nn,:,:].copy()
+                    datatmp=data[corstart[0]:corstart[0]+corsize[0],corstart[1]:corstart[1]+corsize[1]]
+                    if sobel==1:
+                        datatmp=filters.sobel(filters.gaussian(cp.asnumpy(datatmp),5.0))
+                    cc,corr=xyy.corrmaxloc_gpu(initmp, datatmp)
+                    tmp=xyy.imgshift_gpu(data,[-cc[0],-cc[1]])#相关对齐
+                    cubesort0[nn,:,:]=tmp
+                averg=cp.mean(cubesort0, axis=0).astype(cp.float32)#叠加
+                if postprocess_flag == 1:
+                    print('开始退卷积')
+                    cubesr=cubedata[:,srstx:srstx+srxsize,srsty:srsty+srysize]
+                    try:
+                        r0,index=xyy.cubesrdevr0_gpu(cubesr,srsize,winsr,sitfdata,diameter,diaratio,maxfre,0.00,0.06,start_r0,step_r0)
+                    except Exception as e:
+                        sys.exit()
+                    sitf=xyy.GetSitf_gpu(sitfdata,maxfre,rcxsize,index)#读取理论点扩散函数
+                    img=xyy.ImgPSDdeconv_gpu(averg,sitf)
+                    head['CODE2'] = r0#r0写到fits头文件中
+                    result=xyy.ImgFilted_gpu(img,gussf)
+                    result=result/np.median(cp.asnumpy(result))*np.median(cp.asnumpy(averg))
+                    try:#redrive:/*
+                        SaveFits = redrive+os.path.splitdrive(aligned_path[0:-11])[1]
+                        #print(aligned_path)
+                        #print(SaveFits)
+                        xyy.mkdir(SaveFits)
+                        SaveFitsName = os.path.join(SaveFits,aligned_path[-11:])
+                    except Exception as e:
+                        #print(e)
+                        pass
+                    xyy.writefits(SaveFitsName,cp.asnumpy(result).astype(np.float32),head)
+                else:
+                    try:
+                        SaveFits = redrive+os.path.splitdrive(aligned_path[0:-11])[1]
+                        xyy.mkdir(SaveFits)
+                        SaveFitsName = os.path.join(SaveFits,aligned_path[-11:])
+                    except Exception as e:
+                        #print(e)
+                        pass
+                    result = averg
+                    xyy.writefits(SaveFitsName,cp.asnumpy(result).astype(np.float32),head)
+            #print(SaveFitsName)
+            print('elapse:'+str(time.time()-start)+'s')
+            print('计算完毕，等待下一组数据')
+            try:
+                os.mkdir(LatestFitsR0)
+            except Exception as e:
+                pass
+            LtstDtlFts(os.path.join(LatestFitsR0,SaveFitsName.split('/')[-2]+'.latest'),r0,SaveFitsName)
+        #else:
+        #    print('文件夹下无文件，跳过')
         except Exception as e:
+            #print('文件夹下无文件，跳过')
+            print(e)
             pass
-        LtstDtlFts(os.path.join(LatestFitsR0,SaveFitsName.split('/')[-2]+'.latest'),r0,SaveFitsName)
-    #else:
-    #    print('文件夹下无文件，跳过')
-    except Exception as e:
-        #print('文件夹下无文件，跳过')
-        #print(e)
-        pass
+
+        
 def initial(jsonfile):
     f = open(jsonfile,'r')
     para = json.load(f)
