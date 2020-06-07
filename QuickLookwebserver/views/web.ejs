@@ -59,6 +59,7 @@ setTimeout('myrefresh()',60000);
     function str2time(){
         var RT = '<%= data.RT %>'
         var RTT = '<%= data.RTT %>'
+        var date = new Date()
 	if (RT==''){
         //RT = 'UTC '+RT;
         //RTT = 'UTC '+RRT;
@@ -67,8 +68,8 @@ setTimeout('myrefresh()',60000);
         document.getElementById('latestimg').src = 'nvst800x800.png';
         document.getElementById('lastimg').src = 'fxh800x800.png';
 	}else{
-        RT = 'UTC '+String(parseInt(RT.slice(0,2)))+':'+RT.slice(2,4)+':'+RT.slice(4,6);
-        RTT = 'UTC '+String(parseInt(RTT.slice(0,2)))+':'+RTT.slice(2,4)+':'+RTT.slice(4,6);
+        RT = 'UTC '+String(date.getFullYear())+'-'+String(date.getMonth()+1)+'-'+String(date.getDate())+'  '+String(parseInt(RT.slice(0,2)))+':'+RT.slice(2,4)+':'+RT.slice(4,6);
+        RTT = 'UTC '+String(date.getFullYear())+'-'+String(date.getMonth()+1)+'-'+String(date.getDate())+'  '+String(parseInt(RTT.slice(0,2)))+':'+RTT.slice(2,4)+':'+RTT.slice(4,6);
         //console.log(RT)
 		document.getElementById("RT").innerHTML = RT;
 		document.getElementById("RTT").innerHTML = RTT;
