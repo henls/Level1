@@ -55,7 +55,7 @@ def AveDark(DirDark,DirSaveDark,DirLog):
                 fits.writeto(os.path.join(DirSaveDark,today_time+'dark.fits'),np.array(data))
             except Exception as e:
                 pass
-            print('Dark 计算完毕')
+            print('Dark is over')
             #log = open(DirLog,'a+')
             #log.writelines('\n处理后的Dark路径：'+os.path.join(DirSaveDark,today_time+'dark.fits'))
             #log.close()
@@ -103,7 +103,7 @@ def AveFlat(DirFlat,DirSaveFlat,DirLog):
                 #log.writelines('\n处理后的Flat路径：'+os.path.join(DirSaveFlat,today_time+'CFlat.fits'))
                 #log.close()
                 xyy.JsonWrite(DirLog,'AveFlat',[SaveName])
-                print('Flat计算完毕')
+                print('Flat is over')
             except Exception as e:
                 #print(e)
                 pass

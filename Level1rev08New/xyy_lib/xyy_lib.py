@@ -41,7 +41,7 @@ import numpy.random as rand
 from numpy import sinc
 import datetime
 import cupy as cp
-import numba 
+#import numba 
 
 
 ####=================================================   文件操作

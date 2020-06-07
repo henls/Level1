@@ -184,7 +184,7 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
                 tmp = xyy.imgshift_gpu(data,[-cc[0],-cc[1]])#对齐后的图
                 if only_align_no_luckyimage == 1:
                     #不选帧，直接叠加
-                    print('不选帧对齐模式')
+                    print('Pattern without lucky image')
                     ini += tmp
                     t += 1
                 else:
@@ -226,7 +226,7 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
                     cubesort0[nn,:,:]=tmp
                 averg=cp.mean(cubesort0, axis=0).astype(cp.float32)#叠加
                 if postprocess_flag == 1:
-                    print('开始退卷积')
+                    print('Starting deconvolution')
                     cubesr=cubedata[:,srstx:srstx+srxsize,srsty:srsty+srysize]
                     try:
                         r0,index=xyy.cubesrdevr0_gpu(cubesr,srsize,winsr,sitfdata,diameter,diaratio,maxfre,0.00,0.06,start_r0,step_r0)
@@ -259,7 +259,7 @@ def Align(DirFits,DirFlat,DirDark,DeviceNumber):
                     xyy.writefits(SaveFitsName,cp.asnumpy(result).astype(np.float32),head)
             #print(SaveFitsName)
             print('elapse:'+str(time.time()-start)+'s')
-            print('计算完毕，等待下一组数据')
+            print('Complete waiting for next group data')
             try:
                 os.mkdir(LatestFitsR0)
             except Exception as e:

@@ -34,7 +34,7 @@ class EventHandler(pyinotify.ProcessEvent):
             else:
                 pass
     def process_IN_CREATE(self,event):
-        print(1)
+        #print(1)
         log_dir = self.log_dir
         path = event.pathname#workdir/20201315/
         #today_time = re.findall(r'\d{8}', path)[0]
